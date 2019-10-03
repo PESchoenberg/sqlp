@@ -1,4 +1,4 @@
-# sqlp - Sqlite3 terminal query and file processing.
+# sqlp - Simple terminal query and .sql file processing for Sqlite3.
 
 
 
