@@ -58,6 +58,8 @@ fields are separated with a "|" character.
 are not in the same folder as sqlc, then you will need to provide full paths or
 add those files or folders to your $PATH.
 
+* Read the manual found at doc/sqlp.pdf.
+
 
 ## Credits and Sources:
 
