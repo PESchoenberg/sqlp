@@ -28,6 +28,25 @@ sqlp1.cpp
 using namespace std;
 
 
+/* sqlp_no_db - Informs that the database cannot be opened.
+
+Arguments:
+- p_a2: a2.
+- p_b: true if db is available.
+
+ */
+void sqlp_db_ava(std::string p_a2, bool p_b)
+{
+  std::string c = " available.";
+  
+  if (p_b == false)
+    {
+      c = " unavailable.";
+    }
+  cout << "Database " << p_a2 << c << endl;
+}
+
+
 /* sqlp_read_file - Reads a file and returns it as a std::string.
 
 Arguments:
@@ -83,3 +102,26 @@ int sqlp_write_file(std::string p_f, std::string p_d, std::string p_m)
 
   return 0;
 }
+
+
+/* sqlp_save_results - Save results retrieved by callback function sql send_resq 
+   to file. */
+void sqlp_save_results(std::vector<std::string> p_sql_results)
+{
+  std::string res = "";
+  
+  for (unsigned i = 0; i < p_sql_results.size(); i++)
+    {
+      res = res + p_sql_results.at(i);
+      if (i < (p_sql_results.size() - 1))
+	{
+	  /* Separate elements representing fields of records with "|". */
+	  res = res + "|";
+	}
+    }
+	  
+  /* End the results string with a "|". */
+  res = res + "|EOQ|";
+  sqlp_write_file("sqlp_results.txt", res, "out");
+}
+

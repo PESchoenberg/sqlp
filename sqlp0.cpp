@@ -56,6 +56,7 @@ int main(int argc, char** argv)
 {  
   std::string a1 = "";
   std::string a2 = "";
+  std::string a3 = "OPEN_QUERY_CLOSE";
   std::string query = "";
   std::string res = "";
 
@@ -63,16 +64,30 @@ int main(int argc, char** argv)
   char *errmsg;
   const char* data = " ";
   
-  /* There must be three arguments, one as the argument list and two from the 
-     user being:
+  /* There must be three ot four arguments, one as the argument list and two from 
+     the user being:
      - 1: database to operate on.
      - 2: query string or sql file to run.
+     - 3: macro. 
   */
   if (argc == 3)
     {
       a1 = argv[1];
       a2 = argv[2];
-      
+    }
+  else if (argc == 4)
+    {
+      a1 = argv[1];
+      a2 = argv[2];
+      if ((a3 == "OPEN_QUERY_CLOSE")||(a3 == "TEST_DB"))
+	{
+	  a3 = argv[3];
+	}
+    }
+
+  /* Perform this if the number of arguments is correct. */
+  if ((argc == 3) || (argc == 4))
+    {
       /* If substring ".sql" is found in the secon argument, then it is assumed 
 	 that the second argument represents a file. Otherwise, it is assumed 
 	 that it represents a query. */
@@ -85,42 +100,36 @@ int main(int argc, char** argv)
 	{
 	  query = a2;
 	}
-      
-      /* Open the database and perform query. */
+    } 
+  
+  /* Opening, querying and closing according to a3. */
+  if (a3 == "OPEN_QUERY_CLOSE")
+    {        
       if(sqlite3_open(a1.c_str(), &db) == 0)
 	{
-	  /* Send the SQL query string. */
 	  sqlite3_exec(db, query.c_str(), sql_send_resq, (void*)data, &errmsg);
-
-	  /* Save results retrieved by callback function sql send_resq to file. */
-	  for (unsigned i = 0; i < sql_results.size(); i++)
-	    {
-	      res = res + sql_results.at(i);
-	      if (i < (sql_results.size() - 1))
-		{
-		  /* Separate elements representing fields of records with "|". */
-		  res = res + "|";
-		}
-	    }
-	  
-	  /* End the results string with a "|". */
-	  res = res + "|";
-	  sqlp_write_file("sqlp_results.txt", res, "out");
+	  sqlp_save_results(sql_results);
 	  sqlite3_close(db);
 	}
       else
 	{
-	  /* If the database cannot be opened. */
-	  cout << "Database " << a2 << " unavailable." << endl;				
+	  sqlp_db_ava(a2, false);
 	}	
-	  
-      sql_results.erase(sql_results.begin(), sql_results.end());
     }
-  else
+  else if (a3 == "TEST_DB")
     {
-      /* If the number of arguments is wrong. */
-      cout << "Incorrect number of arguments." << endl;
+      if(sqlite3_open(a1.c_str(), &db) == 0)
+	{
+	  sqlp_db_ava(a2, true);
+	}
+      else
+	{
+	  sqlp_db_ava(a2, false);
+	}	  
     }
+  
+  /* Delete the results vctor. */
+  sql_results.erase(sql_results.begin(), sql_results.end());
   
   return 0;
 }
