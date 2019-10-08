@@ -87,3 +87,6 @@ orcid;;;;0;0
 gcc;;;;0;0
 g++;;;;0;0
 trouble;;;;0;0
+macro;;;;0;0
+TEST_DB;;;;0;0
+OPEN_QUERY_CLOSE;;;;0;0

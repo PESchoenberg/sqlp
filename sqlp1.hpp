@@ -39,10 +39,16 @@ sqlp1.hpp
 using namespace std;
 
 
+void sqlp_db_ava(std::string p_a2, bool p_b);
+
+
 std::string sqlp_read_file(std::string p_f);
 
 
 int sqlp_write_file(std::string p_f, std::string p_d, std::string p_m);
+
+
+void sqlp_save_results(std::vector<std::string> p_sql_results);
 
 
 #endif // !__SQLP1_H
