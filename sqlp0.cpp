@@ -74,6 +74,13 @@ int main(int argc, char** argv)
     {
       a1 = argv[1];
       a2 = argv[2];
+
+      /* Some operations require three arguments instead of four, so we need to 
+	 redefine a3 accordingly. */
+      if (a2 == "TEST_DB")
+	{
+	  a3 = a2;
+	}
     }
   else if (argc == 4)
     {
@@ -103,13 +110,18 @@ int main(int argc, char** argv)
     } 
   
   /* Opening, querying and closing according to a3. */
-  if (a3 == "OPEN_QUERY_CLOSE")
+  if ((a3 == "OPEN_QUERY_CLOSE")||(a3 == "OPEN_QUERY_CLOSE_SHOW"))
     {        
       if(sqlite3_open(a1.c_str(), &db) == 0)
 	{
 	  sqlite3_exec(db, query.c_str(), sql_send_resq, (void*)data, &errmsg);
 	  sqlp_save_results(sql_results);
 	  sqlite3_close(db);
+	  if (a3 == "OPEN_QUERY_CLOSE_SHOW")
+	    {
+	      std::string res = sqlp_read_file("sqlp_results.txt");
+	      cout << res << endl;
+	    }
 	}
       else
 	{
@@ -128,7 +140,7 @@ int main(int argc, char** argv)
 	}	  
     }
   
-  /* Delete the results vctor. */
+  /* Delete the results vector. */
   sql_results.erase(sql_results.begin(), sql_results.end());
   
   return 0;

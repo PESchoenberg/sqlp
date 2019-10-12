@@ -7,7 +7,11 @@
 
 This C++ program allows you to send SQL queries as strings or entire .sql files 
 containing several queries to any Sqlite3 database without any additional 
-libraries or add ons aside from Sqlite3 itself. 
+libraries or add ons aside from Sqlite3 itself.
+
+It performs its tasks without using any dot command, so it might be an
+alternative for anyone that needs to use Sqlite3 without its command line
+interpreter.
 
 
 ## Dependencies:
