@@ -30,7 +30,7 @@ sqlp1.hpp
 #include <stdlib.h>
 #include <iostream>
 #include <fstream>
-#include <sstream>
+//#include <sstream>
 #include <string>
 #include <vector>
 #include "sqlite3.h"

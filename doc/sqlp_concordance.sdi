@@ -89,4 +89,7 @@ g++;;;;0;0
 trouble;;;;0;0
 macro;;;;0;0
 TEST_DB;;;;0;0
-OPEN_QUERY_CLOSE;;;;0;0
+OPEN_QUERY_CLOSE;;;;0;1
+OPEN_QUERY_CLOSE_SHOW;;;;0;1
+dot;;;;0;0
+command;;;;0;0
