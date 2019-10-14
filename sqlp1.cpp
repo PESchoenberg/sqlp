@@ -105,7 +105,7 @@ int sqlp_write_file(std::string p_f, std::string p_d, std::string p_m)
 
 
 /* sqlp_save_results - Save results retrieved by callback function sql send_resq 
-   to file. */
+   to file by means of a cursor. */
 void sqlp_save_results(std::vector<std::string> p_sql_results)
 {
   std::string res = "";
