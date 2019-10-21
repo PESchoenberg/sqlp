@@ -25,6 +25,14 @@ sqlp0.cpp
 - See README.md
 - Example: ./sqlp jcp_inm.db "SELECT * FROM trf_streets;"
 
+
+- g++ -std=c++17 -Wall -O3 -c sqlp0.cpp sqlp1.cpp
+
+* Link as:
+
+- g++ -std=c++17 -Wall -O3 sqlp0.o sqlp1.o -o sqlp -lsqlite3 -fopenmp -I/usr/include/hdfql/serial/include/ /usr/include/hdfql/serial/wrapper/cpp/libHDFql.a -ldl
+
+
 ============================================================================= */
 
 
@@ -57,14 +65,15 @@ int main(int argc, char** argv)
   std::string a1 = "";
   std::string a2 = "";
   std::string a3 = "OPEN_QUERY_CLOSE";
-  std::string query = "";
+  std::string q1 = "";
+  std::string q2 = "";
   std::string res = "";
 
   sqlite3 *db;
   char *errmsg;
   const char* data = " ";
   
-  /* There must be three ot four arguments, one as the argument list and two from 
+  /* There must be three or four arguments, one as the argument list and two from 
      the user being:
      - 1: database to operate on.
      - 2: query string or sql file to run.
@@ -95,49 +104,75 @@ int main(int argc, char** argv)
   /* Perform this if the number of arguments is correct. */
   if ((argc == 3) || (argc == 4))
     {
-      /* If substring ".sql" is found in the secon argument, then it is assumed 
-	 that the second argument represents a file. Otherwise, it is assumed 
-	 that it represents a query. */
+      /* If substring ".sql" or ".hql" is found in the secon argument, then it 
+	 is assumed that the second argument represents a file. Otherwise, it 
+	 is assumed that it represents a query. */
 
-      if (a2.find(".sql") != std::string::npos)
+      if ((a2.find(".sql") != std::string::npos)||(a2.find(".hql") != std::string::npos))
 	{
-	  query = sqlp_read_file(a2);
+	  q1 = sqlp_read_file(a2);
 	}
       else
 	{
-	  query = a2;
+	  q1 = a2;
 	}
-    } 
-  
-  /* Opening, querying and closing according to a3. */
-  if ((a3 == "OPEN_QUERY_CLOSE")||(a3 == "OPEN_QUERY_CLOSE_SHOW"))
-    {        
-      if(sqlite3_open(a1.c_str(), &db) == 0)
-	{
-	  sqlite3_exec(db, query.c_str(), sql_send_resq, (void*)data, &errmsg);
-	  sqlp_save_results(sql_results);
-	  sqlite3_close(db);
-	  if (a3 == "OPEN_QUERY_CLOSE_SHOW")
-	    {
-	      std::string res = sqlp_read_file("sqlp_results.txt");
-	      cout << res << endl;
-	    }
-	}
-      else
-	{
-	  sqlp_db_ava(a2, false);
-	}	
     }
-  else if (a3 == "TEST_DB")
+  
+  /* If ".db" is found on the first argument, it is assumed that this is an Sqlite
+   query, If ".h5" is found, it is assumed that this is an hdf5 thing. */
+  if (a1.find(".h5") != std::string::npos)
     {
-      if(sqlite3_open(a1.c_str(), &db) == 0)
-	{
-	  sqlp_db_ava(a2, true);
+      /* Opening, querying and closing according to a3. */
+      if ((a3 == "OPEN_QUERY_CLOSE")||(a3 == "OPEN_QUERY_CLOSE_SHOW"))
+	{       
+	  if (sqlp_file_exists(a1) == false)
+	    {
+	      q2 = "CREATE FILE " + a1;
+	      HDFql::execute(q2.c_str());
+	    }
+	  q2 = "USE FILE " + a1;
+	  HDFql::execute(q2.c_str());
+	  HDFql::execute(q1.c_str());
+	  HDFql::cursorFirst(NULL);
+	  while(HDFql::cursorNext(NULL) == HDFQL_SUCCESS) 
+	    {
+	      sql_results.push_back(sql_send_resq2());
+	    }
+	  
+	  HDFql::execute("CLOSE ALL FILE");
+	  sqlp_save_results(sql_results);
+	  sqlp_show_results_if_applicable(a3);  
 	}
-      else
+      else if (a3 == "TEST_DB")
 	{
-	  sqlp_db_ava(a2, false);
-	}	  
+	  sqlp_test_db(a1);
+	}
+    }
+  else if (a1.find(".db") != std::string::npos)
+    {  
+      /* Opening, querying and closing according to a3. */
+      if ((a3 == "OPEN_QUERY_CLOSE")||(a3 == "OPEN_QUERY_CLOSE_SHOW"))
+	{        
+	  if(sqlite3_open(a1.c_str(), &db) == 0)
+	    {
+	      sqlite3_exec(db, q1.c_str(), sql_send_resq, (void*)data, &errmsg);
+	      sqlp_save_results(sql_results);
+	      sqlite3_close(db);
+	      sqlp_show_results_if_applicable(a3);
+	    }
+	  else
+	    {
+	      sqlp_db_ava(a2, false);
+	    }	
+	}
+      else if (a3 == "TEST_DB")
+	{
+	  sqlp_test_db(a1);
+	}
+    }
+  else
+    {
+      sqlp_db_ava(a2, false);
     }
   
   /* Delete the results vector. */

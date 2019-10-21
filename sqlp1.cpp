@@ -125,3 +125,155 @@ void sqlp_save_results(std::vector<std::string> p_sql_results)
   sqlp_write_file("sqlp_results.txt", res, "out");
 }
 
+
+/* sqlp_file_exists - Returns true if p_f exists, false otherwise.
+
+Arguments:
+- p_f: file name.
+
+ */
+bool sqlp_file_exists(std::string p_f)
+{ 
+  std::ifstream file;
+  file.open(p_f.c_str());
+  if (file.fail())
+    {
+      return false;
+    }
+  file.close();
+  
+  return true;
+}
+
+
+/* sqlp_test_db - tests if a db file exists and reports.
+
+Arguments:
+- p_a1: a1.
+
+*/
+void sqlp_test_db(std::string p_a1)
+{
+  if(sqlp_file_exists(p_a1) == true)
+    {
+      sqlp_db_ava(p_a1, true);
+    }
+  else
+    {
+      sqlp_db_ava(p_a1, false);
+    }
+}
+
+
+/* sqlp_show_results_if_applicable - Shows results on the terminal
+if p_a3 = OPEN_QUERY_CLOSE_SHOW.
+
+Arguments:
+- p_a3: a3.
+
+ */
+void sqlp_show_results_if_applicable(std::string p_a3)
+{
+  if (p_a3 == "OPEN_QUERY_CLOSE_SHOW")
+    {
+      std::string res = sqlp_read_file("sqlp_results.txt");
+      cout << res << endl;
+    }
+}
+
+
+/* sql_send_resq2 - Returns results for hdfql queries.
+
+ */
+std::string sql_send_resq2()
+{
+  int dt;
+  std::string res;
+  
+  /* This stream with a switch is an ugly construction, but seems to 
+     work.*/
+  stringstream sz;
+  dt = HDFql::cursorGetDataType(NULL);
+  switch (dt){
+  case HDFQL_UNSIGNED_SMALLINT:
+    sz << *HDFql::cursorGetSmallInt(NULL);
+    break;
+  case HDFQL_VARBIGINT:
+    sz << *HDFql::cursorGetInt(NULL);
+    break;
+  case HDFQL_UNSIGNED_VARINT:
+    sz << *HDFql::cursorGetInt(NULL);
+    break;
+  case HDFQL_SMALLINT:
+    sz << *HDFql::cursorGetSmallInt(NULL);
+    break;
+  case HDFQL_UNSIGNED_VARTINYINT:
+    sz << *HDFql::cursorGetTinyInt(NULL);
+    break;
+  case HDFQL_VARINT:
+    sz << *HDFql::cursorGetInt(NULL);
+    break;
+  case HDFQL_UNSIGNED_BIGINT:
+    sz << *HDFql::cursorGetUnsignedBigInt(NULL);
+    break;
+  case HDFQL_BIGINT:
+    sz << *HDFql::cursorGetBigInt(NULL);
+    break;
+  case HDFQL_UNSIGNED_VARBIGINT:
+    sz << *HDFql::cursorGetBigInt(NULL);
+    break;
+  case HDFQL_UNSIGNED_VARSMALLINT:
+    sz << *HDFql::cursorGetInt(NULL);
+    break;
+  case HDFQL_VARTINYINT:
+    sz << *HDFql::cursorGetTinyInt(NULL);
+    break;
+  case HDFQL_UNSIGNED_INT:
+    sz << *HDFql::cursorGetUnsignedInt(NULL);
+    break;
+  case HDFQL_UNSIGNED_TINYINT:
+    sz << *HDFql::cursorGetUnsignedTinyInt(NULL);
+    break;
+  case HDFQL_TINYINT:
+    sz << *HDFql::cursorGetTinyInt(NULL);
+    break;
+  case HDFQL_VARSMALLINT:
+    sz << *HDFql::cursorGetSmallInt(NULL);
+    break;
+  case HDFQL_INT:
+    sz << *HDFql::cursorGetInt(NULL);
+    break;
+  case HDFQL_DOUBLE:
+    sz << *HDFql::cursorGetDouble(NULL);
+    break;
+  case HDFQL_VARDOUBLE:
+    sz << *HDFql::cursorGetDouble(NULL);
+    break;		
+  case HDFQL_FLOAT:
+    sz << *HDFql::cursorGetFloat(NULL);
+    break;		
+  case HDFQL_VARFLOAT:
+    sz << *HDFql::cursorGetFloat(NULL);
+    break;
+  case HDFQL_CHAR:
+    sz << *HDFql::cursorGetChar(NULL);
+    break;
+  case HDFQL_VARCHAR:
+    sz << *HDFql::cursorGetChar(NULL);
+    break;	     
+  case HDFQL_OPAQUE:
+    sz << HDFql::cursorGet(NULL);
+    break;
+  case HDFQL_UNDEFINED:
+    sz << HDFql::cursorGet(NULL);
+    break;		
+  default:
+    sz << HDFql::cursorGet(NULL);
+    break;
+  }
+  sz >> res;
+
+  return res;
+}
+
+
