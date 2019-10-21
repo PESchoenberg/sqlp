@@ -29,11 +29,12 @@ sqlp1.hpp
 #include <stdio.h>
 #include <stdlib.h>
 #include <iostream>
+#include <sstream>
 #include <fstream>
-//#include <sstream>
 #include <string>
 #include <vector>
 #include "sqlite3.h"
+#include "/usr/include/hdfql/serial/include/HDFql.hpp"
 
 
 using namespace std;
@@ -49,6 +50,18 @@ int sqlp_write_file(std::string p_f, std::string p_d, std::string p_m);
 
 
 void sqlp_save_results(std::vector<std::string> p_sql_results);
+
+
+bool sqlp_file_exists(std::string p_f);
+
+
+void sqlp_test_db(std::string p_a1);
+
+
+void sqlp_show_results_if_applicable(std::string p_a3);
+
+
+std::string sql_send_resq2();
 
 
 #endif // !__SQLP1_H
