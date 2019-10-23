@@ -32,7 +32,6 @@ sqlp0.cpp
 
 - g++ -std=c++17 -Wall -O3 sqlp0.o sqlp1.o -o sqlp -lsqlite3 -fopenmp -I/usr/include/hdfql/serial/include/ /usr/include/hdfql/serial/wrapper/cpp/libHDFql.a -ldl
 
-
 ============================================================================= */
 
 
@@ -122,7 +121,7 @@ int main(int argc, char** argv)
    query, If ".h5" is found, it is assumed that this is an hdf5 thing. */
   if (a1.find(".h5") != std::string::npos)
     {
-      /* Opening, querying and closing according to a3. */
+      sqlp_test_db(a1, a3);
       if ((a3 == "OPEN_QUERY_CLOSE")||(a3 == "OPEN_QUERY_CLOSE_SHOW"))
 	{       
 	  if (sqlp_file_exists(a1) == false)
@@ -137,20 +136,15 @@ int main(int argc, char** argv)
 	  while(HDFql::cursorNext(NULL) == HDFQL_SUCCESS) 
 	    {
 	      sql_results.push_back(sql_send_resq2());
-	    }
-	  
+	    }	  
 	  HDFql::execute("CLOSE ALL FILE");
 	  sqlp_save_results(sql_results);
 	  sqlp_show_results_if_applicable(a3);  
 	}
-      else if (a3 == "TEST_DB")
-	{
-	  sqlp_test_db(a1);
-	}
     }
   else if (a1.find(".db") != std::string::npos)
     {  
-      /* Opening, querying and closing according to a3. */
+      sqlp_test_db(a1, a3);
       if ((a3 == "OPEN_QUERY_CLOSE")||(a3 == "OPEN_QUERY_CLOSE_SHOW"))
 	{        
 	  if(sqlite3_open(a1.c_str(), &db) == 0)
@@ -164,10 +158,6 @@ int main(int argc, char** argv)
 	    {
 	      sqlp_db_ava(a2, false);
 	    }	
-	}
-      else if (a3 == "TEST_DB")
-	{
-	  sqlp_test_db(a1);
 	}
     }
   else
