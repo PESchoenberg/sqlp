@@ -120,7 +120,6 @@ void sqlp_save_results(std::vector<std::string> p_sql_results)
 	}
     }
 	  
-  /* End the results string with a "|". */
   res = res + "|EOQ|";
   sqlp_write_file("sqlp_results.txt", res, "out");
 }
@@ -146,21 +145,26 @@ bool sqlp_file_exists(std::string p_f)
 }
 
 
-/* sqlp_test_db - tests if a db file exists and reports.
+/* sqlp_test_db - tests if a db file exists and reports if p_a3 is the
+correct macro ("TEST_DB").
 
 Arguments:
 - p_a1: a1.
+- p_a3: a3.
 
 */
-void sqlp_test_db(std::string p_a1)
+void sqlp_test_db(std::string p_a1, std::string p_a3)
 {
-  if(sqlp_file_exists(p_a1) == true)
+  if (p_a3 == "TEST_DB")
     {
-      sqlp_db_ava(p_a1, true);
-    }
-  else
-    {
-      sqlp_db_ava(p_a1, false);
+      if (sqlp_file_exists(p_a1) == true)
+	{
+	  sqlp_db_ava(p_a1, true);
+	}
+      else
+	{
+	  sqlp_db_ava(p_a1, false);
+	}
     }
 }
 

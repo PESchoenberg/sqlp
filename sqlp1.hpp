@@ -55,7 +55,7 @@ void sqlp_save_results(std::vector<std::string> p_sql_results);
 bool sqlp_file_exists(std::string p_f);
 
 
-void sqlp_test_db(std::string p_a1);
+void sqlp_test_db(std::string p_a1, std::string p_a3);
 
 
 void sqlp_show_results_if_applicable(std::string p_a3);
