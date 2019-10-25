@@ -281,3 +281,13 @@ std::string sql_send_resq2()
 }
 
 
+/*
+
+ */
+std::vector<std::string> sqlp_parse_query_line(std::vector<std::string> p_l_query)
+{
+
+  return p_l_query;
+}
+
+
