@@ -64,4 +64,7 @@ void sqlp_show_results_if_applicable(std::string p_a3);
 std::string sql_send_resq2();
 
 
+std::vector<std::string> sqlp_parse_query_line(std::vector<std::string> p_l_query);
+
+
 #endif // !__SQLP1_H

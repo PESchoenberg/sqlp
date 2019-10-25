@@ -60,17 +60,19 @@ static int sql_send_resq(void *data, int argc, char **argv, char **azColName)
 
 /* Main program.*/
 int main(int argc, char** argv)
-{  
+{
   std::string a1 = "";
   std::string a2 = "";
   std::string a3 = "OPEN_QUERY_CLOSE";
   std::string q1 = "";
   std::string q2 = "";
+  std::string q3 = "";
   std::string res = "";
-
   sqlite3 *db;
   char *errmsg;
   const char* data = " ";
+  std::vector<std::string>l_query(0);
+
   
   /* There must be three or four arguments, one as the argument list and two from 
      the user being:
@@ -102,7 +104,7 @@ int main(int argc, char** argv)
 
   /* Perform this if the number of arguments is correct. */
   if ((argc == 3) || (argc == 4))
-    {
+    {      
       /* If substring ".sql" or ".hql" is found in the secon argument, then it 
 	 is assumed that the second argument represents a file. Otherwise, it 
 	 is assumed that it represents a query. */
@@ -110,11 +112,15 @@ int main(int argc, char** argv)
       if ((a2.find(".sql") != std::string::npos)||(a2.find(".hql") != std::string::npos))
 	{
 	  q1 = sqlp_read_file(a2);
+	  l_query.push_back("TRUE");
 	}
       else
 	{
 	  q1 = a2;
+	  l_query.push_back("FALSE");
 	}
+      l_query.push_back(" ");
+      l_query.push_back(q1);
     }
   
   /* If ".db" is found on the first argument, it is assumed that this is an Sqlite
@@ -123,34 +129,66 @@ int main(int argc, char** argv)
     {
       sqlp_test_db(a1, a3);
       if ((a3 == "OPEN_QUERY_CLOSE")||(a3 == "OPEN_QUERY_CLOSE_SHOW"))
-	{       
+	{
+	  /* Create .h5 file if it does not exist inorder to mimic the behavior of
+	     of Sqlite3 in this regard. The idea is that thorough sqlp the user
+	     will have a similar experience with SQL and HDFql.
+	   */
 	  if (sqlp_file_exists(a1) == false)
 	    {
 	      q2 = "CREATE FILE " + a1;
 	      HDFql::execute(q2.c_str());
 	    }
+	  
+	  /* Open .h5 file. */
 	  q2 = "USE FILE " + a1;
 	  HDFql::execute(q2.c_str());
-	  HDFql::execute(q1.c_str());
+
+	  /* Execute composite hdfql statements. */
+	  if (l_query[0] == "TRUE")
+	    {
+	      while (l_query[0] == "TRUE")
+		{
+		  l_query = sqlp_parse_query_line(l_query);	      
+		  q3 = l_query[2];
+		  HDFql::execute(q3.c_str());
+		}
+	    }
+	  /* Execute single hdfql statement. */
+	  else
+	    {
+	      HDFql::execute(q1.c_str());
+	    }	   
+
+	  /* Process results vector. */
 	  HDFql::cursorFirst(NULL);
+	  sql_results.push_back(sql_send_resq2());
 	  while(HDFql::cursorNext(NULL) == HDFQL_SUCCESS) 
 	    {
 	      sql_results.push_back(sql_send_resq2());
 	    }	  
-	  HDFql::execute("CLOSE ALL FILE");
 	  sqlp_save_results(sql_results);
+
+	  /* Close and show results if applicable. */
+	  HDFql::execute("CLOSE ALL FILE");
 	  sqlp_show_results_if_applicable(a3);  
 	}
     }
   else if (a1.find(".db") != std::string::npos)
-    {  
+    {
       sqlp_test_db(a1, a3);
       if ((a3 == "OPEN_QUERY_CLOSE")||(a3 == "OPEN_QUERY_CLOSE_SHOW"))
-	{        
+	{
+	  /* Open Sqlite3 database file (create it if it does not exist). */
 	  if(sqlite3_open(a1.c_str(), &db) == 0)
 	    {
+	      /* Execute sql statements. */ 
 	      sqlite3_exec(db, q1.c_str(), sql_send_resq, (void*)data, &errmsg);
+
+	      /* Process results vector. */
 	      sqlp_save_results(sql_results);
+
+	      /* Close and show results if applicable. */
 	      sqlite3_close(db);
 	      sqlp_show_results_if_applicable(a3);
 	    }
@@ -165,8 +203,9 @@ int main(int argc, char** argv)
       sqlp_db_ava(a2, false);
     }
   
-  /* Delete the results vector. */
+  /* Delete vectors. */
   sql_results.erase(sql_results.begin(), sql_results.end());
+  l_query.erase(l_query.begin(), l_query.end());
   
   return 0;
 }
