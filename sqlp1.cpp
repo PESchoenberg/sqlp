@@ -281,12 +281,65 @@ std::string sql_send_resq2()
 }
 
 
-/*
+/* sqlp_parse_query_line - Prepares queries as single ones extracted from 
+composite query strings.
+
+Arguments:
+- p_l_query: l_query.
+  - [0]: string "TRUE" or "FALSE".
+  - [1]: string of simple query extracted from [2].
+  - [2]: string with complete composite query.
+
+Returns:
+- p_l_query with updated elements.
+  - [0]: "TRUE", "FALSE" or "NULL". Notice the trinary nature of this element.
+  - [1]: parsed, simple query without the ";" separator.
+  - [2]: remainder of composite query string, minus [1].
 
  */
 std::vector<std::string> sqlp_parse_query_line(std::vector<std::string> p_l_query)
 {
+  std::string e0 = p_l_query[0];
+  std::string e1 = p_l_query[1];
+  std::string e2 = p_l_query[2];
+  std::string s1 = ";";
+  std::string s2 = "QUERY_FINISHED";
+  
+  std::size_t found_s1 = e2.find(s1);
+  std::size_t found_s2 = e2.find(s2);
+  if (found_s1 != std::string::npos)
+    {
+      /* Tell the world that we have a query from a composite query. */
+      p_l_query[0] = "TRUE";
 
+      /* Extract the string of the subquery without the s1 character. */
+      p_l_query[1] = e2.substr(0,(found_s1));
+
+      /* Get the reduced composite query from the caracter following the found
+       s1 character to the end of the string. */
+      p_l_query[2] = e2.substr(found_s1 + 1);
+
+      //cout << p_l_query[0] << " " << p_l_query[1] << " " << p_l_query[2] << endl;
+    }
+  else
+    {
+      /* If no s1 is found but there is no s2 as contents of e2 then return the 
+	 query as a single one. If e2 = s2, return NULL as first element. */
+      if (found_s2 != std::string::npos)
+	{
+	  p_l_query[0] = "NULL";
+	  p_l_query[1] = "";
+	  p_l_query[2] = "";
+	}
+      else
+	{
+	  p_l_query[0] = "FALSE";
+	  p_l_query[1] = e2;
+	  p_l_query[2] = s2;
+	}
+    }
+  //cout << p_l_query[0] << " " << p_l_query[1] << " " << p_l_query[2] << endl;
+  
   return p_l_query;
 }
 

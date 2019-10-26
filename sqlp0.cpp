@@ -112,15 +112,15 @@ int main(int argc, char** argv)
       if ((a2.find(".sql") != std::string::npos)||(a2.find(".hql") != std::string::npos))
 	{
 	  q1 = sqlp_read_file(a2);
-	  l_query.push_back("TRUE");
+	  l_query.push_back("TRUE"); // Meaning a composite query ensues.
 	}
       else
 	{
 	  q1 = a2;
-	  l_query.push_back("FALSE");
+	  l_query.push_back("TRUE"); // Meaning a simple query.
 	}
-      l_query.push_back(" ");
-      l_query.push_back(q1);
+      l_query.push_back(" "); // The string for each simple query out of composites..
+      l_query.push_back(q1); // The composite query string itself.
     }
   
   /* If ".db" is found on the first argument, it is assumed that this is an Sqlite
@@ -130,7 +130,7 @@ int main(int argc, char** argv)
       sqlp_test_db(a1, a3);
       if ((a3 == "OPEN_QUERY_CLOSE")||(a3 == "OPEN_QUERY_CLOSE_SHOW"))
 	{
-	  /* Create .h5 file if it does not exist inorder to mimic the behavior of
+	  /* Create .h5 file if it does not exist in order to mimic the behavior 
 	     of Sqlite3 in this regard. The idea is that thorough sqlp the user
 	     will have a similar experience with SQL and HDFql.
 	   */
@@ -143,18 +143,26 @@ int main(int argc, char** argv)
 	  /* Open .h5 file. */
 	  q2 = "USE FILE " + a1;
 	  HDFql::execute(q2.c_str());
-
+	  
 	  /* Execute composite hdfql statements. */
 	  if (l_query[0] == "TRUE")
 	    {
 	      while (l_query[0] == "TRUE")
 		{
-		  l_query = sqlp_parse_query_line(l_query);	      
-		  q3 = l_query[2];
-		  HDFql::execute(q3.c_str());
+		  /* This will return new values for each l_query element. */
+		  l_query = sqlp_parse_query_line(l_query);
+
+		  /* Reassign q1. */
+		  q1 = l_query[1];
+		  if (l_query[0] != "NULL")
+		    {
+		      //cout << "-----" << endl;
+		      //cout << ">" << q1 << endl;
+		      HDFql::execute(q1.c_str());
+		    }
 		}
 	    }
-	  /* Execute single hdfql statement. */
+	  /* Execute single hdfql statement. PROVISO. */
 	  else
 	    {
 	      HDFql::execute(q1.c_str());
