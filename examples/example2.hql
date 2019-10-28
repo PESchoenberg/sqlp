@@ -1,1 +1,3 @@
-select from dset4;select from dset4;select from dset4;
+SELECT FROM dset1;
+SELECT FROM dset2;
+
