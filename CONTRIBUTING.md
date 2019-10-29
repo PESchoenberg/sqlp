@@ -21,7 +21,7 @@ please take your time to review the info listed below.
 * Write clear and orderly code while respecting the general coding style of the
 project.
 
-* You need to have a verified signature. See
+* You need to have a verified signature in order to contribute. See
 https://help.github.com/articles/managing-commit-signature-verification/
 
 * Nothing is written in stone. New guidelines might come into effect at any

@@ -28,7 +28,7 @@ sqlp1.cpp
 using namespace std;
 
 
-/* sqlp_no_db - Informs that the database cannot be opened.
+/* sqlp_db_ava - Informs that the database cannot be opened.
 
 Arguments:
 - p_a2: a2.
@@ -105,7 +105,12 @@ int sqlp_write_file(std::string p_f, std::string p_d, std::string p_m)
 
 
 /* sqlp_save_results - Save results retrieved by callback function sql send_resq 
-   to file by means of a cursor. */
+   to file by means of a cursor.
+
+Arguments:
+- p_sql_results: sql_results.
+ 
+*/
 void sqlp_save_results(std::vector<std::string> p_sql_results)
 {
   std::string res = "";
@@ -115,7 +120,8 @@ void sqlp_save_results(std::vector<std::string> p_sql_results)
       res = res + p_sql_results.at(i);
       if (i < (p_sql_results.size() - 1))
 	{
-	  /* Separate elements representing fields of records with "|". */
+	  /* Separate elements representing fields of records with a pipe 
+	     character. */
 	  res = res + "|";
 	}
     }
@@ -282,11 +288,12 @@ std::string sql_send_resq2()
 
 
 /* sqlp_parse_query_line - Prepares queries as single ones extracted from 
-composite query strings.
+composite query strings. This function uses trinary logic, but instead of 
+boolean type variables, it employs strings to indicate the state.
 
 Arguments:
 - p_l_query: l_query.
-  - [0]: string "TRUE" or "FALSE".
+  - [0]: string "TRUE", "FALSE" or "NULL".
   - [1]: string of simple query extracted from [2].
   - [2]: string with complete composite query.
 
@@ -318,8 +325,6 @@ std::vector<std::string> sqlp_parse_query_line(std::vector<std::string> p_l_quer
       /* Get the reduced composite query from the caracter following the found
        s1 character to the end of the string. */
       p_l_query[2] = e2.substr(found_s1 + 1);
-
-      //cout << p_l_query[0] << " " << p_l_query[1] << " " << p_l_query[2] << endl;
     }
   else
     {
@@ -338,7 +343,6 @@ std::vector<std::string> sqlp_parse_query_line(std::vector<std::string> p_l_quer
 	  p_l_query[2] = s2;
 	}
     }
-  //cout << p_l_query[0] << " " << p_l_query[1] << " " << p_l_query[2] << endl;
   
   return p_l_query;
 }
