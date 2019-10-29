@@ -46,7 +46,15 @@ std::vector<std::string> sql_results(0);
 
 
 /* sql_send_resq - Looks into a database file and brings results via the 
-   sql_results vector. */
+   sql_results vector. 
+
+Arguments:
+- data
+- argc
+- argv
+- azColName
+
+*/
 static int sql_send_resq(void *data, int argc, char **argv, char **azColName)  
 {  
   for(int i = 0; i < argc; i++)
@@ -72,7 +80,6 @@ int main(int argc, char** argv)
   char *errmsg;
   const char* data = " ";
   std::vector<std::string>l_query(0);
-
   
   /* There must be three or four arguments, one as the argument list and two from 
      the user being:
@@ -86,7 +93,8 @@ int main(int argc, char** argv)
       a2 = argv[2];
 
       /* Some operations require three arguments instead of four, so we need to 
-	 redefine a3 accordingly. */
+	 redefine a3 accordingly. 
+      */
       if (a2 == "TEST_DB")
 	{
 	  a3 = a2;
@@ -107,8 +115,8 @@ int main(int argc, char** argv)
     {      
       /* If substring ".sql" or ".hql" is found in the secon argument, then it 
 	 is assumed that the second argument represents a file. Otherwise, it 
-	 is assumed that it represents a query. */
-
+	 is assumed that it represents a query. 
+      */
       l_query.push_back("TRUE");      
       if ((a2.find(".sql") != std::string::npos)||(a2.find(".hql") != std::string::npos))
 	{
@@ -123,7 +131,8 @@ int main(int argc, char** argv)
     }
   
   /* If ".db" is found on the first argument, it is assumed that this is an Sqlite
-   query, If ".h5" is found, it is assumed that this is an hdf5 thing. */
+     query, If ".h5" is found, it is assumed that this is an hdf5 thing. 
+  */
   if (a1.find(".h5") != std::string::npos)
     {
       sqlp_test_db(a1, a3);
