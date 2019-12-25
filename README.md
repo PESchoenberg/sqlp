@@ -18,6 +18,8 @@ interpreter.
 
 * Sqlite3.
 
+* File extension-functions.c from the Sqlite3 Contributed Files.
+
 * HDF5.
 
 * HDFql.
@@ -27,9 +29,9 @@ See the Sources section below for links to these dependencies.
 
 ## Installation:
 
-* Install the required Slite3, HDF5 and HDFql files first and make sure that
-they work. Both Sqlite3 and HDFql offer command-line interpreters, so
-testing them should not be difficult.
+* Install the required Slite3 base and extension files, HDF5 and HDFql files 
+first and make sure that they work. Both Sqlite3 and HDFql offer command-line 
+interpreters, so testing them should not be difficult.
 
 * You may want to add your Sqlite3 and HDFql installations to your $PATH
 variable at this point.
@@ -45,7 +47,9 @@ on your system.
 in sqlp1.hpp is correct; change it accordingly.
 
 
-* Compile as (Linux):
+* Compile as (Linux) with the following steps:
+
+- gcc -fPIC -lm -shared extension-functions.c -o libsqlitefunctions.so
 
 - g++ -std=c++17 -Wall -O3 -c sqlp0.cpp sqlp1.cpp
 
@@ -111,6 +115,9 @@ full paths or add those files or folders to your $PATH.
 
 * Sqlite.org. (2000). SQLite Home Page. [online] Available at: 
 https://www.sqlite.org/index.html [Accessed 26 Aug. 2019].
+
+* Sqlite.org. (2000) SQLite Contributed Files. [online] Available at:
+https://www.sqlite.org/contrib [Accessed 26 Nov. 2019].
 
 * The HDF Group. (2019). The HDF Group - ensuring long-term access and
 usability of HDF data and supporting users of HDF technologies. [online]

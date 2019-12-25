@@ -25,7 +25,7 @@ sqlp0.hpp
 #ifndef __SQLP0_H
 #define __SQLP0_H
 
-/* */
+
 #include "sqlp1.hpp"
 
 

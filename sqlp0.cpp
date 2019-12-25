@@ -25,12 +25,22 @@ sqlp0.cpp
 - See README.md
 - Example: ./sqlp jcp_inm.db "SELECT * FROM trf_streets;"
 
+* Compilation:
 
-- g++ -std=c++17 -Wall -O3 -c sqlp0.cpp sqlp1.cpp
+- First the Sqlite3 extensions:
+
+  - gcc -fPIC -g -lm -Wall -shared extension-functions.c -o libsqlitefunctions.so
+
+- Then sqlp itself:
+
+  - g++ -std=c++17 -Wall -O3 -c sqlp0.cpp sqlp1.cpp
 
 * Link as:
 
 - g++ -std=c++17 -Wall -O3 sqlp0.o sqlp1.o -o sqlp -lsqlite3 -fopenmp -I/usr/include/hdfql/serial/include/ /usr/include/hdfql/serial/wrapper/cpp/libHDFql.a -ldl
+
+Note: The paths for linking correspond to the author's setup. Change those
+paths according to your system.
 
 ============================================================================= */
 
@@ -69,6 +79,7 @@ static int sql_send_resq(void *data, int argc, char **argv, char **azColName)
 /* Main program.*/
 int main(int argc, char** argv)
 {
+  int cols = 1;
   std::string a1 = "";
   std::string a2 = "";
   std::string a3 = "OPEN_QUERY_CLOSE";
@@ -80,10 +91,12 @@ int main(int argc, char** argv)
   char *errmsg;
   const char* data = " ";
   std::vector<std::string>l_query(0);
-  
+  //size_t pos = 0;
+
+ 
   /* There must be three or four arguments, one as the argument list and two from 
      the user being:
-     - 1: database to operate on.
+     - 1: database file (Sqlite3 .db, HDF5 .h5 or text .txt) to operate on.
      - 2: query string or sql file to run.
      - 3: macro. 
   */
@@ -177,7 +190,7 @@ int main(int argc, char** argv)
 
 	  /* Close and show results if applicable. */
 	  HDFql::execute("CLOSE ALL FILE");
-	  sqlp_show_results_if_applicable(a3);  
+	  sqlp_show_results_if_applicable(a3, cols);  
 	}
     }
   else if (a1.find(".db") != std::string::npos)
@@ -188,6 +201,17 @@ int main(int argc, char** argv)
 	  /* Open Sqlite3 database file (create it if it does not exist). */
 	  if(sqlite3_open(a1.c_str(), &db) == 0)
 	    {
+	      /* Load required Sqlite3 extensions. Comment-out these two lines if 
+		 for any reason you do not want to use extensions. If you want to
+		 add more extensions, get the require the .c files, compile them 
+		 like libsqlitefunctions and add a new sqlite3_load_extension() call
+		 per extension below.
+	      */
+	      if (sqlite3_db_config(db, SQLITE_DBCONFIG_ENABLE_LOAD_EXTENSION, 1, NULL) == SQLITE_OK)
+		{
+		  sqlite3_load_extension(db, "libsqlitefunctions", 0, 0);
+		}
+
 	      /* Execute sql statements. */ 
 	      sqlite3_exec(db, q1.c_str(), sql_send_resq, (void*)data, &errmsg);
 
@@ -196,12 +220,47 @@ int main(int argc, char** argv)
 
 	      /* Close and show results if applicable. */
 	      sqlite3_close(db);
-	      sqlp_show_results_if_applicable(a3);
+	      sqlp_show_results_if_applicable(a3, cols);
 	    }
 	  else
 	    {
 	      sqlp_db_ava(a2, false);
 	    }	
+	}
+    }
+  else if (a1.find("sqlp_results.txt") != std::string::npos)
+    {
+      /*
+	This option requires thre arguments:
+	- a1: the name of the file to show or print.
+	- a2: the number of colums (default 1).
+	- a3: macros PRETTY_*
+      */
+    
+      /* Establish the presentation format based on the number of cols selected with argument a2 */
+    
+      if ((a2.find("COLS=") != std::string::npos)||(a2.find("cols=") != std::string::npos))
+	{
+	  std::string str1 = "COLS=";
+	  std::string str2 = "";
+	  std::string str3 = "";
+	  size_t pos1 = 0;
+	  //size_t pos2 = 0;
+	  
+	  // Extract the number of cols to print between COLS= and the first semicolon after that.
+	  size_t found1 = a2.find(str1); 
+	  if (found1 != string::npos)
+	    {
+	      str2 = a2.substr(pos1);
+	      size_t found2 = str2.find(";");
+	      str3 = str2.substr(5,(found2 - 1));
+	      cols = (int)sqlp_s2d(str3);
+	    }
+	}
+      sqlp_pretty_format(a1, cols);
+      if (a3 == "PRETTY_SHOW")
+	{
+	  sqlp_show_results_if_applicable(a3, cols);
 	}
     }
   else
