@@ -28,6 +28,26 @@ sqlp1.cpp
 using namespace std;
 
 
+/* sqlp_s2d - Converts a string to a double.
+
+Arguments:
+- p_s: string to convert.
+
+Output:
+- Double.
+
+ */
+double sqlp_s2d(std::string p_s)
+{
+  double res = 0.00;
+
+  stringstream strs(p_s);
+  strs >> res;
+ 
+  return res;
+}
+
+
 /* sqlp_db_ava - Informs that the database cannot be opened.
 
 Arguments:
@@ -182,13 +202,19 @@ Arguments:
 - p_a3: a3.
 
  */
-void sqlp_show_results_if_applicable(std::string p_a3)
+void sqlp_show_results_if_applicable(std::string p_a3, int p_cols)
 {
+  std::string res = "";
   if (p_a3 == "OPEN_QUERY_CLOSE_SHOW")
     {
-      std::string res = sqlp_read_file("sqlp_results.txt");
+      res = sqlp_read_file("sqlp_results.txt");
       cout << res << endl;
     }
+  else if (p_a3 == "PRETTY_SHOW")
+    {
+      res = sqlp_read_file("sqlp_results.txt");
+            
+    } 
 }
 
 
@@ -201,7 +227,7 @@ std::string sql_send_resq2()
   std::string res;
   
   /* This stream with a switch is an ugly construction, but seems to 
-     work.*/
+     work. */
   stringstream sz;
   dt = HDFql::cursorGetDataType(NULL);
   switch (dt){
@@ -346,5 +372,99 @@ std::vector<std::string> sqlp_parse_query_line(std::vector<std::string> p_l_quer
   
   return p_l_query;
 }
+
+
+/* sqlp_pretty_format - Formats string p_s1 for columnar presentation with p_cols
+columns.
+
+Arguments:
+- p_a1 string to format.
+- p_cols: number of columns to divide p_s1 into.
+
+ */
+std::string sqlp_pretty_format(std::string p_a1, int p_cols)
+{
+  int cols = p_cols - 1;
+  //int cols = 12 - 1;
+  int col = 0;
+  int ll = 0;
+  std::string t_file = "sqlp_pretty_tmp.txt";
+  std::string file_line = "";
+  std::string res = sqlp_read_file(p_a1);
+  std::vector<int> l_cols; 
+
+  /* Set all vector elements to zero. */
+  for(int i = 0; i <= cols; i++)
+    {
+      l_cols.push_back(0);
+    }
+  
+  /* Get rid of some special characters first, just in case */
+  replace(res.begin(), res.end(), '\n', ' ');
+  replace(res.begin(), res.end(), '\r', ' ');
+  
+  /* Replace pipes with newlines so that every column field is in a different line */
+  replace(res.begin(), res.end(), '|', '\n');
+
+  /* Save to temp file. */
+  sqlp_write_file(t_file, res, "out");  
+  
+  /* Find the max length of each field and store those values on l_cols. */
+  std::ifstream file1;
+  file1.open(t_file.c_str());
+  while (getline(file1, file_line))
+    {
+      if (file_line != "EOF\n")
+	{
+	  ll = 0;
+	  ll = file_line.length();
+	  if (ll > l_cols[col])
+	    {
+	      l_cols[col] = ll;
+	    }
+	  col++;
+	  if (col > cols)
+	    {
+	      col = 0;
+	    }
+	}
+    }
+  file1.close();
+
+  /* Pad each field to achieve the max length contained in l_cols per field. */
+  col = 0;
+  res = "";
+  std::ifstream file2;
+  file2.open(t_file.c_str());
+  while (getline(file2, file_line))
+    {
+      if (file_line != "EOF\n")
+	{
+	  /* We take out the new line char per field  */
+	  replace(file_line.begin(), file_line.end(), '\n', ' ');	  
+	  
+	  /*  Pad file_line to the max length of this field type contained in l_cols */
+	  if ((int)file_line.length() < l_cols[col])
+	    {
+	      file_line.append(l_cols[col] - file_line.length(), ' ');
+	    }
+	  res = res + "|" + file_line;
+	  col++;
+	  if (col > cols)
+	    {
+	      col = 0;
+	      res = res + "\n";
+	    }
+	}
+    }
+  file2.close();
+
+  /* Save to pretty file. */
+  sqlp_write_file(t_file, res, "out");
+  
+  return res;
+}
+
+
 
 

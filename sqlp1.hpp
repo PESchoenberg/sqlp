@@ -33,11 +33,15 @@ sqlp1.hpp
 #include <fstream>
 #include <string>
 #include <vector>
+#include <algorithm>
 #include "sqlite3.h"
 #include "/usr/include/hdfql/serial/include/HDFql.hpp"
 
 
 using namespace std;
+
+
+double sqlp_s2d(std::string p_s);
 
 
 void sqlp_db_ava(std::string p_a2, bool p_b);
@@ -58,13 +62,16 @@ bool sqlp_file_exists(std::string p_f);
 void sqlp_test_db(std::string p_a1, std::string p_a3);
 
 
-void sqlp_show_results_if_applicable(std::string p_a3);
+void sqlp_show_results_if_applicable(std::string p_a3, int p_cols);
 
 
 std::string sql_send_resq2();
 
 
 std::vector<std::string> sqlp_parse_query_line(std::vector<std::string> p_l_query);
+
+
+std::string sqlp_pretty_format(std::string p_s1, int p_cols);
 
 
 #endif // !__SQLP1_H
