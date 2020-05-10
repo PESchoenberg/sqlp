@@ -4,7 +4,7 @@ sqlp0.cpp
 
 ================================================================================
 
- Copyright (C) 2019  Pablo Edronkin (pablo.edronkin at yahoo.com)
+ Copyright (C) 2019 - 2020  Pablo Edronkin (pablo.edronkin at yahoo.com)
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU Lesser General Public License as published by
@@ -92,7 +92,6 @@ int main(int argc, char** argv)
   const char* data = " ";
   std::vector<std::string>l_query(0);
   //size_t pos = 0;
-
  
   /* There must be three or four arguments, one as the argument list and two from 
      the user being:
@@ -126,7 +125,7 @@ int main(int argc, char** argv)
   /* Perform this if the number of arguments is correct. */
   if ((argc == 3) || (argc == 4))
     {      
-      /* If substring ".sql" or ".hql" is found in the secon argument, then it 
+      /* If substring ".sql" or ".hql" is found in the second argument, then it 
 	 is assumed that the second argument represents a file. Otherwise, it 
 	 is assumed that it represents a query. 
       */
@@ -245,7 +244,6 @@ int main(int argc, char** argv)
 	  std::string str2 = "";
 	  std::string str3 = "";
 	  size_t pos1 = 0;
-	  //size_t pos2 = 0;
 	  
 	  // Extract the number of cols to print between COLS= and the first semicolon after that.
 	  size_t found1 = a2.find(str1); 
